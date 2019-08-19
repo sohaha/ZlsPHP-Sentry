@@ -1,0 +1,22 @@
+{
+  "name": "zls/sentry",
+  "description": "sentry for ZlsPHP",
+  "type": "library",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "authors": [
+    {
+      "name": "影浅",
+      "email": "seekwe@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Zls\\Sentry\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=7.1.0",
+    "sentry/sdk": "^2.0.3"
+  }
+}
