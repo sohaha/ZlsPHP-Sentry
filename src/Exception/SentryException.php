@@ -55,7 +55,7 @@ class SentryException implements \Zls_Exception_Handle
             return;
         }
         Raven_Autoloader::register();
-        $client = new Raven_Client($this->dsn, array_merge(['app_path' => './', 'excluded_app_paths' => ['vendor']], $this->options));
+        $client = new Raven_Client($this->dsn, array_merge(['app_path' => Z::realPath('.',true,false), 'excluded_app_paths' => ['vendor']], $this->options));
         $client->getIdent($client->captureException($exception));
     }
 }
