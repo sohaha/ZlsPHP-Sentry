@@ -16,6 +16,7 @@ class SentryException implements \Zls_Exception_Handle
 {
     private $dsn = '';
     private $options;
+    private $global;
 
     public function __construct($dsn = '', $options = [])
     {
@@ -25,7 +26,8 @@ class SentryException implements \Zls_Exception_Handle
             $this->dsn = Z::config('ini.sentry.dsn');
         }
         $this->options = $options;
-        if (!$this->dsn) {
+        $this->global  = Z::config('ini.sentry.global');
+        if (!$this->dsn && $this->global) {
             Zls_Logger_Dispatcher::initialize();
             throw new InvalidArgumentException('Invalid Sentry DSN');
         }
@@ -37,15 +39,23 @@ class SentryException implements \Zls_Exception_Handle
         if (!$config->getShowError()) {
             $ajax      = Z::isAjax();
             $errorCode = $exception->getCode();
+            $this->captureException($exception);
 
             return $ajax ? Z::json($errorCode, $errorCode) : $errorCode;
-        }
-        if ($this->dsn) {
-            Raven_Autoloader::register();
-            $client = new Raven_Client($this->dsn, array_merge(['app_path' => './', 'excluded_app_paths' => ['vendor']], $this->options));
-            $client->getIdent($client->captureException($exception));
+        } elseif ($this->global) {// 默认情况只在关闭debug下开启
+            $this->captureException($exception);
         }
 
         return $exception;
+    }
+
+    private function captureException(\Exception $exception)
+    {
+        if (!$this->dsn) {
+            return;
+        }
+        Raven_Autoloader::register();
+        $client = new Raven_Client($this->dsn, array_merge(['app_path' => './', 'excluded_app_paths' => ['vendor']], $this->options));
+        $client->getIdent($client->captureException($exception));
     }
 }
